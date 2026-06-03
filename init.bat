@@ -1,40 +1,35 @@
 @echo off
-echo.
-echo ========================================
-echo INICIANDO PROYECTO CUBA SCIENCE PLAN
-echo ========================================
-echo.
+setlocal
 
-:: Obtener la ruta actual
-set "CURRENT_DIR=%CD%"
+:: Obtiene la ruta actual donde ejecutaste el archivo
+set "CURRENT_PATH=%CD%"
 
-:: Normalizar rutas para comparar (quitar barras invertidas dobles, etc.)
-set "FRONTEND_DIR=D:\Trabajo\cuba-science-plan-frontend"
+echo ============================================
+echo      INICIANDO PROYECTO
+echo ============================================
 
-:: Comparar si estamos en la carpeta del frontend
-if /i "%CURRENT_DIR%"=="%FRONTEND_DIR%" (
-    echo [FRONTEND] Detectado: Iniciando frontend con npm run dev
-    echo.
-    cd /d "%FRONTEND_DIR%\frontend"
-    npm run dev
-) else (
-    echo [BACKEND] Iniciando servidor Django...
-    echo.
-    :: Cambiar a la unidad D:
-    D:
-    :: Activar entorno virtual
-    cd /d "D:\Trabajo\cuba-science-plan-backend\backend\env\Scripts"
-    call activate
-    :: Ir al proyecto Django
-    cd /d "D:\Trabajo\cuba-science-plan-backend\backend\science_plan"
-    :: Ejecutar servidor
-    echo.
-    echo ========================================
-    echo SERVIDOR DJANGO INICIADO
-    echo ========================================
-    echo.
+:: Detectar si estamos en la carpeta del Backend
+echo %CURRENT_PATH% | findstr /i "cuba-science-plan-backend" >nul
+if not errorlevel 1 (
+    echo [INFO] Detectado: Backend
+    call backend\env\Scripts\activate.bat
+    cd backend
     python manage.py runserver
+    goto :end
 )
 
-:: Mantener ventana abierta si hay error
+:: Detectar si estamos en la carpeta del Frontend
+echo %CURRENT_PATH% | findstr /i "cuba-science-plan-frontend" >nul
+if not errorlevel 1 (
+    echo [INFO] Detectado: Frontend
+    cd frontend
+    call npm run dev
+    goto :end
+)
+
+echo [ERROR] No se pudo identificar el proyecto.
+echo Asegurate de que el archivo start.bat este en la carpeta raiz del proyecto.
+pause
+
+:end
 pause
